@@ -8,8 +8,6 @@ services:
       POSTGRES_PASSWORD: mysecretpassword
     ports:
       - "5432:5432"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
     restart: unless-stopped
 
   mongo_db:
@@ -17,8 +15,6 @@ services:
     container_name: tech-market-mongo
     ports:
       - "27017:27017"
-    volumes:
-      - ./data/mongo:/data/db
     restart: unless-stopped
 
   cassandra_db:
@@ -26,6 +22,4 @@ services:
     container_name: tech-market-cassandra
     ports:
       - "9042:9042"
-    volumes:
-      - ./data/cassandra:/var/lib/cassandra
     restart: unless-stopped
