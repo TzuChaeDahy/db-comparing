@@ -7,13 +7,13 @@ import random
 import uuid
 import time
 
-# Configurações iniciais
+
 fake = Faker("pt_BR")
 NUM_CLIENTES = 20000
 NUM_PRODUTOS = 5000
 NUM_PEDIDOS = 30000
 
-# Categorias e enums
+
 CATEGORIAS = [
     "Eletrônicos",
     "Informática",
@@ -139,19 +139,17 @@ def populate_mongodb():
     start = time.time()
 
     try:
-        # Clientes
+
         print(f"Gerando {NUM_CLIENTES} clientes...")
         clientes, client_ids = gerar_clientes(NUM_CLIENTES)
         db.clientes.insert_many(clientes)
         print("Clientes inseridos.")
 
-        # Produtos
         print(f"Gerando {NUM_PRODUTOS} produtos...")
         produtos, product_ids = gerar_produtos(NUM_PRODUTOS)
         db.produtos.insert_many(produtos)
         print("Produtos inseridos.")
 
-        # Pedidos
         print(f"Gerando {NUM_PEDIDOS} pedidos com pagamentos aninhados...")
         pedidos = gerar_pedidos(NUM_PEDIDOS, client_ids, product_ids)
         db.pedidos.insert_many(pedidos)

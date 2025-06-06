@@ -3,17 +3,15 @@ from psycopg2 import OperationalError
 import time
 from datetime import datetime, timedelta
 import uuid
-import random  # Importar para usar random.choice
+import random
 
-# --- Configurações de Conexão ---
 DB_HOST = "localhost"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASSWORD = "mysecretpassword"
 DB_PORT = "5432"
 
-NUM_RUNS = 10  # Número de vezes que cada consulta será executada para calcular a média
-
+NUM_RUNS = 10
 
 def connect_to_postgres():
     """Conecta ao banco de dados PostgreSQL e retorna o objeto de conexão."""
@@ -40,10 +38,10 @@ def execute_query(cursor, query_sql, params=None):
         cursor.execute(query_sql, params)
     else:
         cursor.execute(query_sql)
-    # Fetch all results to ensure the query is fully processed
+
     results = cursor.fetchall()
     end_time = time.time()
-    return (end_time - start_time) * 1000, results  # Tempo em milissegundos
+    return (end_time - start_time) * 1000, results
 
 
 def run_postgres_queries():
@@ -55,12 +53,11 @@ def run_postgres_queries():
     cursor = conn.cursor()
 
     try:
-        # --- Q1: Buscar cliente por email e listar seus últimos 3 pedidos ---
+
         print(
             "\n--- Executando Q1: Buscar cliente por email e listar seus últimos 3 pedidos ---"
         )
-        # Obter um email de cliente existente para a consulta
-        # Buscamos um número limitado de clientes e escolhemos um aleatoriamente para dinamizar
+
         cursor.execute(
             "SELECT email, id FROM Cliente OFFSET floor(random() * (SELECT COUNT(*) FROM Cliente)) LIMIT 1;"
         )
@@ -69,7 +66,7 @@ def run_postgres_queries():
             client_email, client_id = sample_client
             q1_times = []
             for _ in range(NUM_RUNS):
-                # Usando um JOIN para obter cliente e seus pedidos
+
                 query_sql = """
                     SELECT
                         c.nome, c.email, p.id, p.data_pedido, p.status, p.valor_total
@@ -93,11 +90,10 @@ def run_postgres_queries():
         else:
             print("Nenhum cliente encontrado para testar Q1.")
 
-        # --- Q2: Listar produtos de uma categoria ordenados por preço ---
         print(
             "\n--- Executando Q2: Listar produtos de uma categoria ordenados por preço ---"
         )
-        # Obter uma categoria existente aleatoriamente
+
         cursor.execute(
             "SELECT categoria FROM Produto GROUP BY categoria OFFSET floor(random() * (SELECT COUNT(DISTINCT categoria) FROM Produto)) LIMIT 1;"
         )
@@ -128,11 +124,10 @@ def run_postgres_queries():
         else:
             print("Nenhuma categoria encontrada para testar Q2.")
 
-        # --- Q3: Listar pedidos de um cliente com status "entregue" ---
         print(
             "\n--- Executando Q3: Listar pedidos de um cliente com status 'entregue' ---"
         )
-        # Obter um ID de cliente existente aleatoriamente
+
         cursor.execute(
             "SELECT id FROM Cliente OFFSET floor(random() * (SELECT COUNT(*) FROM Cliente)) LIMIT 1;"
         )
@@ -161,7 +156,6 @@ def run_postgres_queries():
         else:
             print("Nenhum cliente encontrado para testar Q3.")
 
-        # --- Q4: Obter os 5 produtos mais vendidos ---
         print("\n--- Executando Q4: Obter os 5 produtos mais vendidos ---")
         q4_times = []
         for _ in range(NUM_RUNS):
@@ -186,18 +180,17 @@ def run_postgres_queries():
             f"Exemplo de resultado (Q4): {results[0] if results else 'Nenhum produto vendido encontrado.'}"
         )
 
-        # --- Q5: Consultar pagamentos feitos via PIX no último mês ---
         print(
             "\n--- Executando Q5: Consultar pagamentos feitos via PIX no último mês ---"
         )
-        # Obter uma data de pagamento de exemplo para definir o "último mês"
+
         cursor.execute(
             "SELECT data_pagamento FROM Pagamento WHERE tipo = 'pix' OFFSET floor(random() * (SELECT COUNT(*) FROM Pagamento WHERE tipo = 'pix')) LIMIT 1;"
         )
         sample_payment_date = cursor.fetchone()
         if sample_payment_date:
             reference_date = sample_payment_date[0]
-            # Definir o início e fim do mês da data de referência
+
             start_date_q5 = reference_date.replace(
                 day=1, hour=0, minute=0, second=0, microsecond=0
             )
@@ -245,18 +238,17 @@ def run_postgres_queries():
         else:
             print("Nenhum pagamento PIX encontrado para testar Q5.")
 
-        # --- Q6: Obter o valor total gasto por um cliente em pedidos realizados em um determinado período (ex.: último 3 meses) ---
         print(
             "\n--- Executando Q6: Obter o valor total gasto por um cliente em pedidos em um período ---"
         )
-        # Obter um ID de cliente existente aleatoriamente
+
         cursor.execute(
             "SELECT id FROM Cliente OFFSET floor(random() * (SELECT COUNT(*) FROM Cliente)) LIMIT 1;"
         )
         sample_client_id_q6 = cursor.fetchone()
         if sample_client_id_q6:
             client_id_q6 = sample_client_id_q6[0]
-            # Obter uma data de pedido de exemplo para definir o "período" de 3 meses
+
             cursor.execute(
                 "SELECT data_pedido FROM Pedido WHERE id_cliente = %s OFFSET floor(random() * (SELECT COUNT(*) FROM Pedido WHERE id_cliente = %s)) LIMIT 1;",
                 (client_id_q6, client_id_q6),
@@ -266,9 +258,7 @@ def run_postgres_queries():
             if sample_order_date:
                 reference_date_q6 = sample_order_date[0]
                 end_date_q6 = reference_date_q6
-                start_date_q6 = end_date_q6 - timedelta(
-                    days=90
-                )  # Aproximadamente 3 meses atrás
+                start_date_q6 = end_date_q6 - timedelta(days=90)
 
                 q6_times = []
                 for _ in range(NUM_RUNS):

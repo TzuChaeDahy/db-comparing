@@ -3,7 +3,6 @@ from pymongo.errors import ConnectionFailure
 import time
 
 def create_indexes_mongodb(client):
-    """Cria os índices nas coleções do MongoDB."""
     db = client.techmarket_db
 
     try:
@@ -35,7 +34,6 @@ def create_indexes_mongodb(client):
 
 
 def connect_to_mongodb():
-    """Conecta ao banco de dados MongoDB e retorna o objeto cliente."""
     client = None
     try:
         client = MongoClient(

@@ -5,7 +5,6 @@ import uuid
 
 
 def create_tables_postgres(conn):
-    """Cria as tabelas e índices no banco de dados PostgreSQL."""
     cursor = conn.cursor()
     try:
 
@@ -128,7 +127,6 @@ def create_tables_postgres(conn):
 
 
 def connect_to_postgres():
-    """Conecta ao banco de dados PostgreSQL e retorna o objeto de conexão."""
     conn = None
     try:
         conn = psycopg2.connect(

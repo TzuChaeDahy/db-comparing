@@ -15,7 +15,6 @@ NUM_PAGAMENTOS = 30000
 
 
 def connect_to_postgres():
-    """Conecta ao banco de dados PostgreSQL e retorna o objeto de conexão."""
     conn = None
     try:
         conn = psycopg2.connect(
@@ -41,7 +40,6 @@ def populate_postgres():
     start_time = time.time()
 
     try:
-        # --- 1. Popular Clientes ---
         print(f"Populando {NUM_CLIENTES} clientes no PostgreSQL...")
         client_ids = []
         for _ in range(NUM_CLIENTES):
@@ -53,7 +51,7 @@ def populate_postgres():
                 VALUES (%s, %s, %s, %s, %s, %s)
             """,
                 (
-                    str(client_id),  # Convertendo UUID para string
+                    str(client_id),
                     fake.name(),
                     fake.unique.email(),
                     fake.phone_number(),
@@ -64,7 +62,6 @@ def populate_postgres():
         conn.commit()
         print("Clientes inseridos.")
 
-        # --- 2. Popular Produtos ---
         print(f"Populando {NUM_PRODUTOS} produtos no PostgreSQL...")
         product_ids = []
         categories = [
@@ -86,7 +83,7 @@ def populate_postgres():
                 VALUES (%s, %s, %s, %s, %s)
             """,
                 (
-                    str(product_id),  # Convertendo UUID para string
+                    str(product_id),
                     fake.word().capitalize() + " " + fake.word() + " " + fake.word(),
                     random.choice(categories),
                     round(random.uniform(10.0, 5000.0), 2),
@@ -95,8 +92,6 @@ def populate_postgres():
             )
         conn.commit()
         print("Produtos inseridos.")
-
-        # --- 3. Popular Pedidos e ItemPedido ---
         print(f"Populando {NUM_PEDIDOS} pedidos e seus itens no PostgreSQL...")
         order_ids = []
         for _ in range(NUM_PEDIDOS):
@@ -111,17 +106,15 @@ def populate_postgres():
             items_for_order = []
             valor_total = 0
 
-            # Seleciona produtos aleatórios, garantindo que não exceda o número disponível
             selected_product_ids = random.sample(
                 product_ids, min(num_items, len(product_ids))
             )
-
             for prod_id in selected_product_ids:
                 quantity = random.randint(1, 3)
                 price_unit = round(random.uniform(10.0, 1000.0), 2)
                 items_for_order.append(
                     (str(order_id), str(prod_id), quantity, price_unit)
-                )  # Convertendo UUIDs para string
+                )
                 valor_total += quantity * price_unit
 
             cursor.execute(
@@ -136,9 +129,7 @@ def populate_postgres():
                     status,
                     round(valor_total, 2),
                 ),
-            )  # Convertendo UUIDs para string
-
-            # Inserir itens do pedido na tabela ItemPedido
+            )
             if items_for_order:
                 cursor.executemany(
                     """
@@ -149,8 +140,6 @@ def populate_postgres():
                 )
         conn.commit()
         print("Pedidos e Itens de Pedido inseridos.")
-
-        # --- 4. Popular Pagamentos ---
         print(f"Populando {NUM_PAGAMENTOS} pagamentos no PostgreSQL...")
         payment_types = ["cartão", "pix", "boleto"]
         payment_status = ["aprovado", "pendente", "recusado"]
@@ -164,8 +153,8 @@ def populate_postgres():
                 VALUES (%s, %s, %s, %s, %s)
             """,
                 (
-                    str(payment_id),  # Convertendo UUID para string
-                    str(order_id),  # Convertendo UUID para string
+                    str(payment_id),
+                    str(order_id),
                     random.choice(payment_types),
                     random.choice(payment_status),
                     payment_date,

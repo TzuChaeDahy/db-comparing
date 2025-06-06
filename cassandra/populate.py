@@ -12,12 +12,11 @@ KEYSPACE = "techmarket_ks"
 NUM_CLIENTES = 20000
 NUM_PRODUTOS = 5000
 NUM_PEDIDOS = 30000
-# Pagamentos serão gerados junto com os pedidos para a tabela pagamentos_base
-# e para a tabela denormalizada pagamentos_por_tipo_mes.
+
+
 
 
 def connect_to_cassandra():
-    """Conecta ao cluster Cassandra e retorna o objeto de sessão."""
     cluster = None
     session = None
     try:
@@ -26,7 +25,7 @@ def connect_to_cassandra():
             port=9042,
             connection_class=GeventConnection,
             connect_timeout=30,
-        )  # Aumentado o timeout para dar mais tempo ao Cassandra
+        )  
         session = cluster.connect()
         session.set_keyspace(KEYSPACE)
         return session
@@ -47,7 +46,7 @@ def populate_cassandra():
     start_time = time.time()
 
     try:
-        # --- 1. Popular Clientes ---
+        
         print(f"Populando {NUM_CLIENTES} clientes no Cassandra (clientes_por_email)...")
         client_ids = []
         for _ in range(NUM_CLIENTES):
@@ -70,7 +69,7 @@ def populate_cassandra():
             )
         print("Clientes inseridos.")
 
-        # --- 2. Popular Produtos ---
+        
         print(
             f"Populando {NUM_PRODUTOS} produtos no Cassandra (produtos_por_categoria)..."
         )
@@ -105,7 +104,7 @@ def populate_cassandra():
             )
         print("Produtos inseridos.")
 
-        # --- 3. Popular Pedidos e Pagamentos (Denormalizados) ---
+        
         print(
             f"Populando {NUM_PEDIDOS} pedidos e {NUM_PEDIDOS} pagamentos no Cassandra..."
         )
@@ -128,10 +127,10 @@ def populate_cassandra():
                 product_ids, min(num_items, len(product_ids))
             )
 
-            # Para o valor_total do pedido (simplificado, pois itens não são armazenados aqui)
+            
             valor_total = round(random.uniform(50.0, 5000.0), 2)
 
-            # Inserir na tabela base de pedidos
+            
             session.execute(
                 """
                 INSERT INTO pedidos_base (id_pedido, id_cliente, data_pedido, status, valor_total)
@@ -140,7 +139,7 @@ def populate_cassandra():
                 (order_id, client_id, order_date, order_status, valor_total),
             )
 
-            # Inserir na tabela de pedidos por cliente e status (para Q3)
+            
             session.execute(
                 """
                 INSERT INTO pedidos_por_cliente_status (id_cliente, status, data_pedido, id_pedido, valor_total)
@@ -149,14 +148,14 @@ def populate_cassandra():
                 (client_id, order_status, order_date, order_id, valor_total),
             )
 
-            # Gerar e inserir dados de pagamento
+            
             payment_id = uuid.uuid4()
             payment_type = random.choice(payment_types)
             payment_status = random.choice(payment_status_options)
             payment_date = fake.date_time_between(start_date="-6m", end_date="now")
             ano_mes = payment_date.strftime("%Y-%m")
 
-            # Inserir na tabela base de pagamentos
+            
             session.execute(
                 """
                 INSERT INTO pagamentos_base (id_pagamento, id_pedido, tipo, status, data_pagamento)
@@ -165,7 +164,7 @@ def populate_cassandra():
                 (payment_id, order_id, payment_type, payment_status, payment_date),
             )
 
-            # Inserir na tabela de pagamentos por tipo e mês (para Q5)
+            
             session.execute(
                 """
                 INSERT INTO pagamentos_por_tipo_mes (tipo, ano_mes, data_pagamento, id_pagamento, id_pedido, status)

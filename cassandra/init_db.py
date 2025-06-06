@@ -6,7 +6,6 @@ import time
 
 KEYSPACE = "techmarket_ks"
 
-
 def create_keyspace_and_tables_cassandra(session):
     try:
 
@@ -118,7 +117,6 @@ def create_keyspace_and_tables_cassandra(session):
 
 
 def connect_to_cassandra():
-    """Conecta ao cluster Cassandra e retorna o objeto de sessão."""
     cluster = None
     session = None
     try:
