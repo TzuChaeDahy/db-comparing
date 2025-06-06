@@ -4,12 +4,12 @@ import time
 from datetime import datetime, timedelta
 import uuid
 from bson.codec_options import UuidRepresentation
-import random  
+import random
 
 
 MONGO_URI = "mongodb://localhost:27017/"
 DB_NAME = "techmarket_db"
-NUM_RUNS = 10  
+NUM_RUNS = 10
 
 
 def connect_to_mongodb():
@@ -27,14 +27,11 @@ def connect_to_mongodb():
         return None
 
 
-
 def measure_execution_time(mongo_cursor_or_pipeline_result):
     start_time = time.time()
-    results = list(
-        mongo_cursor_or_pipeline_result
-    )  
+    results = list(mongo_cursor_or_pipeline_result)
     end_time = time.time()
-    return (end_time - start_time) * 1000, results  
+    return (end_time - start_time) * 1000, results
 
 
 def run_mongodb_queries():
@@ -46,11 +43,11 @@ def run_mongodb_queries():
     db = client[DB_NAME]
 
     try:
-        
+
         print(
             "\n--- Executando Q1: Buscar cliente por email e listar seus últimos 3 pedidos ---"
         )
-        
+
         sample_client = db.clientes.aggregate(
             [{"$sample": {"size": 1}}, {"$project": {"email": 1, "_id": 1}}]
         ).next()
@@ -83,7 +80,7 @@ def run_mongodb_queries():
                         }
                     },
                 ]
-                
+
                 time_taken, results = measure_execution_time(
                     db.clientes.aggregate(pipeline)
                 )
@@ -96,11 +93,10 @@ def run_mongodb_queries():
         else:
             print("Nenhum cliente encontrado para testar Q1.")
 
-        
         print(
             "\n--- Executando Q2: Listar produtos de uma categoria ordenados por preço ---"
         )
-        
+
         sample_product = db.produtos.aggregate(
             [{"$sample": {"size": 1}}, {"$project": {"categoria": 1}}]
         ).next()
@@ -109,7 +105,7 @@ def run_mongodb_queries():
             q2_times = []
             for _ in range(NUM_RUNS):
                 query_filter = {"categoria": product_category}
-                
+
                 cursor = db.produtos.find(
                     query_filter,
                     {"nome": 1, "categoria": 1, "preco": 1, "estoque": 1, "_id": 0},
@@ -124,11 +120,10 @@ def run_mongodb_queries():
         else:
             print("Nenhuma categoria encontrada para testar Q2.")
 
-        
         print(
             "\n--- Executando Q3: Listar pedidos de um cliente com status 'entregue' ---"
         )
-        
+
         sample_client_q3 = db.clientes.aggregate(
             [{"$sample": {"size": 1}}, {"$project": {"_id": 1}}]
         ).next()
@@ -137,7 +132,7 @@ def run_mongodb_queries():
             q3_times = []
             for _ in range(NUM_RUNS):
                 query_filter = {"id_cliente": client_id_q3, "status": "entregue"}
-                
+
                 cursor = db.pedidos.find(
                     query_filter,
                     {"data_pedido": 1, "status": 1, "valor_total": 1, "_id": 1},
@@ -152,7 +147,6 @@ def run_mongodb_queries():
         else:
             print("Nenhum cliente encontrado para testar Q3.")
 
-        
         print("\n--- Executando Q4: Obter os 5 produtos mais vendidos ---")
         q4_times = []
         for _ in range(NUM_RUNS):
@@ -192,11 +186,10 @@ def run_mongodb_queries():
             f"Exemplo de resultado (Q4): {results[0] if results else 'Nenhum produto vendido encontrado.'}"
         )
 
-        
         print(
             "\n--- Executando Q5: Consultar pagamentos feitos via PIX no último mês ---"
         )
-        
+
         sample_payment = db.pedidos.aggregate(
             [
                 {"$match": {"pagamento.tipo": "pix"}},
@@ -210,7 +203,7 @@ def run_mongodb_queries():
             and "data_pagamento" in sample_payment["pagamento"]
         ):
             reference_date = sample_payment["pagamento"]["data_pagamento"]
-            
+
             start_date_q5 = reference_date.replace(
                 day=1, hour=0, minute=0, second=0, microsecond=0
             )
@@ -243,7 +236,7 @@ def run_mongodb_queries():
                         "$lte": end_date_q5,
                     },
                 }
-                
+
                 cursor = db.pedidos.find(
                     query_filter, {"pagamento": 1, "_id": 1, "id_cliente": 1}
                 ).sort("pagamento.data_pagamento", -1)
@@ -257,61 +250,62 @@ def run_mongodb_queries():
         else:
             print("Nenhum pagamento PIX encontrado para testar Q5.")
 
-        
+        # --- Q6: Obter o valor total gasto por um cliente em pedidos em um período ---
+        # This section is now correctly dedented
         print(
             "\n--- Executando Q6: Obter o valor total gasto por um cliente em pedidos em um período ---"
         )
-        
-        sample_client_q6 = db.clientes.aggregate(
-            [{"$sample": {"size": 1}}, {"$project": {"_id": 1}}]
-        ).next()
-        if sample_client_q6:
-            client_id_q6 = sample_client_q6["_id"]
-            
-            sample_order_date_q6 = db.pedidos.find_one(
-                {"id_cliente": client_id_q6}, {"data_pedido": 1}
-            )
-            if sample_order_date_q6:
-                reference_date_q6 = sample_order_date_q6["data_pedido"]
-                end_date_q6 = reference_date_q6
-                start_date_q6 = end_date_q6 - timedelta(
-                    days=90
-                )  
 
-                q6_times = []
-                for _ in range(NUM_RUNS):
-                    pipeline = [
-                        {
-                            "$match": {
-                                "id_cliente": client_id_q6,
-                                "data_pedido": {
-                                    "$gte": start_date_q6,
-                                    "$lte": end_date_q6,
-                                },
-                            }
-                        },
-                        {
-                            "$group": {
-                                "_id": "$id_cliente",
-                                "total_gasto": {"$sum": "$valor_total"},
-                            }
-                        },
-                    ]
-                    time_taken, results = measure_execution_time(
-                        db.pedidos.aggregate(pipeline)
-                    )
-                    q6_times.append(time_taken)
-                avg_time = sum(q6_times) / NUM_RUNS
-                print(f"Média de tempo (Q6): {avg_time:.2f} ms")
-                print(
-                    f"Exemplo de resultado (Q6 - cliente {client_id_q6} no período {start_date_q6.strftime('%Y-%m-%d')} a {end_date_q6.strftime('%Y-%m-%d')}): {results[0] if results else 'Nenhum gasto encontrado para o cliente no período.'}"
+        # Q6: Obter o valor total gasto por um cliente em pedidos em um período
+        # Modificação: Selecionar um pedido aleatório para garantir que o cliente tem pedidos
+        sample_order_for_q6 = db.pedidos.aggregate(
+            [
+                {"$sample": {"size": 1}},
+                {"$project": {"id_cliente": 1, "data_pedido": 1}},
+            ]
+        ).next()
+
+        if sample_order_for_q6:
+            client_id_q6 = sample_order_for_q6["id_cliente"]
+            reference_date_q6 = sample_order_for_q6["data_pedido"]
+
+            # Define o período: 90 dias antes da data do pedido de referência até a data do pedido de referência
+            end_date_q6 = reference_date_q6
+            start_date_q6 = end_date_q6 - timedelta(days=90)
+
+            q6_times = []
+            for _ in range(NUM_RUNS):
+                pipeline = [
+                    {
+                        "$match": {
+                            "id_cliente": client_id_q6,
+                            "data_pedido": {
+                                "$gte": start_date_q6,
+                                "$lte": end_date_q6,
+                            },
+                        }
+                    },
+                    {
+                        "$group": {
+                            "_id": "$id_cliente",
+                            "total_gasto": {"$sum": "$valor_total"},
+                        }
+                    },
+                ]
+                time_taken, results = measure_execution_time(
+                    db.pedidos.aggregate(pipeline)
                 )
-            else:
-                print(
-                    f"Nenhum pedido encontrado para o cliente {client_id_q6} para definir o período em Q6."
-                )
+                q6_times.append(time_taken)
+
+            avg_time = sum(q6_times) / NUM_RUNS
+            print(f"Média de tempo (Q6): {avg_time:.2f} ms")
+            print(
+                f"Exemplo de resultado (Q6 - cliente {client_id_q6} no período {start_date_q6.strftime('%Y-%m-%d')} a {end_date_q6.strftime('%Y-%m-%d')}): {results[0] if results else 'Nenhum gasto encontrado para o cliente no período.'}"
+            )
         else:
-            print("Nenhum cliente encontrado para testar Q6.")
+            print(
+                "Nenhum pedido encontrado para testar Q6. Certifique-se de que há dados na coleção 'pedidos'."
+            )
 
     except ConnectionFailure as e:
         print(f"Erro de conexão ao executar consultas no MongoDB: {e}")
