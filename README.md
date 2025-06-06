@@ -112,48 +112,17 @@ O tempo total de inserção para cada banco será registrado para análise compa
 
 ### 🐘 PostgreSQL
 
-| Etapa / Consulta               | Tentativa 1 | Tentativa 2 | Tentativa 3 | Tentativa 4 | Tentativa 5 |
-| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
-| Inserção de Clientes           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Produtos           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Pedidos+Pagamentos | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| **Total População**            | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   |
-| Q1: Cliente + Últimos Pedidos  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q2: Produtos por Categoria     | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q3: Pedidos Entregues Cliente  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q4: Top 5 Produtos Vendidos    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q5: Pagamentos via PIX (30d)   | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q6: Total Gasto por Cliente    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
+| Etapa / Consulta              | 🐘 PostgreSQL | 🍃 MongoDB | 🔶 Cassandra |
+| ----------------------------- | ------------- | ---------- | ------------ |
+| Inserção de Clientes          | 263.77s       | 7.28s      | 4.85s        |
+| Q1: Cliente + Últimos Pedidos | 2.79ms        | 0.00ms     | 1.18ms       |
+| Q2: Produtos por Categoria    | 3.90ms        | 10.61ms    | 28.70ms      |
+| Q3: Pedidos Entregues Cliente | 1.67ms        | 3.95ms     | 1.93ms       |
+| Q4: Top 5 Produtos Vendidos   | 65.04ms       | 0.00ms     | 612.17ms     |
+| Q5: Pagamentos via PIX (30d)  | 34.95ms       | 144.22ms   | 251.54ms     |
+| Q6: Total Gasto por Cliente   | 2.89ms        | 0.0ms      | 2.39ms       |
 
-### 🍃 MongoDB
-
-| Etapa / Consulta               | Tentativa 1 | Tentativa 2 | Tentativa 3 | Tentativa 4 | Tentativa 5 |
-| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
-| Inserção de Clientes           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Produtos           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Pedidos+Pagamentos | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| **Total População**            | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   |
-| Q1: Cliente + Últimos Pedidos  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q2: Produtos por Categoria     | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q3: Pedidos Entregues Cliente  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q4: Top 5 Produtos Vendidos    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q5: Pagamentos via PIX (30d)   | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q6: Total Gasto por Cliente    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-
-### 🔶 Cassandra
-
-| Etapa / Consulta               | Tentativa 1 | Tentativa 2 | Tentativa 3 | Tentativa 4 | Tentativa 5 |
-| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
-| Inserção de Clientes           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Produtos           | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Inserção de Pedidos+Pagamentos | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| **Total População**            | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   | **XX.XX**   |
-| Q1: Cliente + Últimos Pedidos  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q2: Produtos por Categoria     | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q3: Pedidos Entregues Cliente  | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q4: Top 5 Produtos Vendidos    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q5: Pagamentos via PIX (30d)   | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
-| Q6: Total Gasto por Cliente    | XX.XX       | XX.XX       | XX.XX       | XX.XX       | XX.XX       |
+OBS.: As queries que tiveram 0.00ms foram tão rápidas que superaram a rapidez de processamento do Python.
 
 ---
 
